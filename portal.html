@@ -372,9 +372,9 @@
   
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-      // ⚠️ CRÍTICO: REEMPLAZA ESTOS VALORES CON LOS DE TU PROYECTO REAL DE SUPABASE
-      const SUPABASE_URL = 'https://qaszraspbwzanoajdrvg.supabase.co'; 
-      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhc3pyYXNwYnd6YW5vYWpkcnZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0MTkwMTAsImV4cCI6MjA3ODk5NTAxMH0.HfWJjrP0Xweyz7vu53crYhViWEBFdS62VicijjGEkFg';
+      // ⚠️ CRÍTICO: TUS VALORES REALES DE SUPABASE
+      const SUPABASE_URL = 'https://ebhubqzibfytddmktmic.supabase.co'; 
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImViaHVicXppYmZ5dGRkbWt0bWljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0MTIzNjksImV4cCI6MjA3ODk4ODM2OX0.QogmKmwu28Bq5MJbNy2l6VSv5E9qGt1p71E-kfY58aI';
       
       const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   </script>
@@ -385,20 +385,22 @@
     
     // --- LÓGICA DE CARGA DE DATOS ---
 
-    // 1. Datos estáticos de ejemplo (Solo como fallback)
+    // 1. Datos estáticos de ejemplo
     const defaultPortalCourses = [
-        { id: 101, title: 'Protocolos de Servicio al Cliente', category: 'BANCO (NATURA Y DUPREE)', description: 'Módulo esencial sobre la nueva normativa de atención y fidelización de clientes.', progress: 75, url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', evaluationId: 501, titulo: 'Protocolos de Servicio al Cliente', url_video: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' },
-        { id: 102, title: 'Inducción Médica Obligatoria', category: 'AUNA', description: 'Revisión anual de políticas de seguridad y nuevos procedimientos internos.', progress: 10, url: 'https://player.vimeo.com/video/84102980', evaluationId: 502, titulo: 'Inducción Médica Obligatoria', url_video: 'https://player.vimeo.com/video/84102980' },
+        { id: 101, title: 'Protocolos de Servicio al Cliente', category: 'BANCO (NATURA Y DUPREE)', description: 'Módulo esencial sobre la nueva normativa de atención y fidelización de clientes.', progress: 75, url: 'https://www.youtube.com/watch?v=VBfaQ00MfwY', evaluationId: 501 },
+        { id: 102, title: 'Inducción Médica Obligatoria', category: 'AUNA', description: 'Revisión anual de políticas de seguridad y nuevos procedimientos internos.', progress: 10, url: 'https://player.vimeo.com/video/84102980', evaluationId: 502 },
     ];
+    
+    // 2. Cargar datos creados por el admin desde localStorage o usar los default
+    let portalCourses = JSON.parse(localStorage.getItem('allCourses')) || defaultPortalCourses;
     
     // 3. Simulación de la evaluación asociada
     const evaluations = {
         501: { title: 'Misión: Protocolos de Servicio al Cliente', difficulty: 'Intermedio', time: '20 minutos', lives: 3, type: 'Arrastrar y Soltar' },
         502: { title: 'Misión: Inducción Operativa', difficulty: 'Fácil', time: '10 minutos', lives: 5, type: 'Memoria de Cartas' },
-        999: { title: 'Misión: Sondeo Rápido', difficulty: 'Fácil', time: '5 minutos', lives: 5, type: 'Sondeo Rápido' }, 
+        999: { title: 'Misión: Sondeo Rápido', difficulty: 'Fácil', time: '5 minutos', lives: 5, type: 'Sondeo Rápido' }, // Evaluación para material de sondeo
     };
     
-    let portalCourses = []; // Se llenará con data de Supabase
     let currentViewingCourseId = null; 
 
     // --- FUNCIONES DE UTILIDAD (CORREGIDA PARA YOUTUBE Y THUMBNAIL) ---
@@ -408,7 +410,7 @@
         
         if (youtubeMatch) {
             const videoId = youtubeMatch[1];
-            // Usar formato de incrustación más compatible con parámetros de seguridad:
+            // Formato de incrustación más compatible con parámetro de seguridad:
             return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&autoplay=0`; 
         }
         
@@ -458,17 +460,17 @@
     
     // FUNCIÓN CRÍTICA: CARGA DESDE SUPABASE
     async function fetchCoursesFromSupabase() {
-        // Mostrar un mensaje de carga
         const grid = document.getElementById('course-grid');
         grid.innerHTML = '<p style="color: #6366f1;">Cargando cursos de la base de datos...</p>';
         
+        // CRÍTICO: Consultar la tabla de cursos
         const { data, error } = await supabase
             .from('cursos')
-            .select('id, titulo, descripcion, url_video, categoria, estado'); // Seleccionar las columnas que necesitamos
+            .select('id, titulo, descripcion, url_video, categoria, estado'); 
 
         if (error) {
             console.error('Error al cargar cursos:', error);
-            grid.innerHTML = '<p style="color:#dc2626;">Error al cargar los cursos. Comprueba tus políticas RLS.</p>';
+            grid.innerHTML = '<p style="color:#dc2626;">Error al cargar los cursos. Comprueba tus Políticas RLS. (El error puede ser: ' + error.message + ')</p>';
             return;
         }
 
@@ -490,7 +492,7 @@
 
     function renderCourseCards() {
         const grid = document.getElementById('course-grid');
-        grid.innerHTML = ''; // Limpiar el grid si hay un mensaje de carga
+        grid.innerHTML = '';
         
         if (!portalCourses || portalCourses.length === 0) {
              grid.innerHTML = '<p style="color:#f97316;">No hay cursos disponibles. Crea uno como Administrador.</p>';
