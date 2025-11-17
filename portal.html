@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portal de Usuario - Academia Geincos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
+  <style>
+    /* Estilos base (Mantiene la coherencia con el Admin Dashboard) */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Poppins", system-ui, -apple-system, BlinkMacMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background-color: #0f172a; /* Fondo principal oscuro */
+      color: #e2e8f0;
+    }
+
+    /* ENCABEZADO SUPERIOR (NAVBAR) */
+    .navbar {
+        background: #020617; /* Fondo muy oscuro */
+        padding: 15px 40px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+    .navbar-logo h1 {
+        font-size: 20px;
+        color: #6366f1; /* Color principal */
+        font-weight: 700;
+    }
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    .user-info span {
+        font-size: 14px;
+        color: #94a3b8;
+    }
+    .btn-logout {
+        background-color: #dc2626;
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        text-decoration: none;
+    }
+    .btn-logout:hover {
+        background-color: #b91c1c;
+    }
+
+    /* CONTENIDO PRINCIPAL */
+    .portal-content {
+        padding: 40px;
+    }
+    .content-header {
+        margin-bottom: 30px;
+        border-bottom: 1px solid #1e293b;
+        padding-bottom: 15px;
+    }
+    .content-header h1 {
+        font-size: 28px;
+        font-weight: 600;
+    }
+    .content-header p {
+        color: #94a3b8;
+        font-size: 14px;
+    }
+
+    /* GRID DE CURSOS */
+    #course-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+    }
+    
+    .course-card {
+        background: #1e293b;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border-left: 5px solid #6366f1; /* Borde de color */
+        position: relative; 
+        overflow: hidden;
+    }
+    .course-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+    }
+    
+    /* VISTA PREVIA DEL VIDEO DENTRO DE LA TARJETA */
+    .course-thumbnail {
+        width: 100%;
+        height: 150px;
+        background-color: #111827;
+        background-size: cover;
+        background-position: center;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .course-thumbnail .material-icons-outlined {
+        font-size: 48px;
+        color: rgba(255, 255, 255, 0.8);
+        text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+        position: absolute;
+    }
+
+
+    .course-card h2 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #e2e8f0;
+    }
+    .course-card p {
+        font-size: 12px;
+        color: #94a3b8;
+        margin-bottom: 15px;
+    }
+    .course-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .course-card-footer span {
+        font-size: 12px;
+        color: #10b981; /* Color verde para el estado */
+    }
+    .progress-bar-container {
+        width: 100%;
+        background-color: #334155;
+        border-radius: 6px;
+        margin-top: 10px;
+        overflow: hidden;
+    }
+    .progress-bar {
+        height: 10px;
+        background: linear-gradient(90deg, #6366f1, #a855f7);
+        width: 0%; /* Se actualizará con JS */
+        transition: width 0.5s ease-in-out;
+    }
+
+    /* VISTA DE CONTENIDO DEL CURSO */
+    #course-view-container {
+        background: #111827;
+        border-radius: 12px;
+        padding: 30px;
+    }
+    .video-player {
+        position: relative;
+        width: 100%;
+        padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+        height: 0;
+        margin-bottom: 20px;
+        background-color: black;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .video-player iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+    .btn-return {
+        background: #475569;
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        margin-bottom: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .evaluation-link {
+        background: #f97316;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        display: inline-block;
+        margin-top: 20px;
+        text-decoration: none;
+        transition: background-color 0.2s;
+    }
+    .evaluation-link:hover {
+        background: #e06010;
+    }
+
+    /* ESTILOS DE LA VISTA DE MISIÓN DE EVALUACIÓN (NUEVOS) */
+    .mission-header {
+        text-align: center;
+        padding: 30px 0;
+        background: #1e293b;
+        border-radius: 12px;
+        margin-bottom: 30px;
+    }
+    .mission-header h2 {
+        font-size: 32px;
+        color: #10b981;
+        margin-bottom: 10px;
+    }
+    .mission-stats {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin-top: 20px;
+        color: #94a3b8;
+    }
+    .mission-stat-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 16px;
+    }
+    .mission-stat-item .material-icons {
+        color: #6366f1;
+    }
+    .mission-instructions {
+        background: #1e293b;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 20px;
+        border-left: 5px solid #a855f7;
+    }
+    .btn-start-mission {
+        background: #6366f1;
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: 600;
+        display: block;
+        width: 100%;
+        transition: background-color 0.2s;
+    }
+    .btn-start-mission:hover {
+        background: #4f46e5;
+    }
+
+
+    /* MEDIA QUERY */
+    @media (max-width: 768px) {
+        .navbar { padding: 15px 20px; }
+        .portal-content { padding: 20px; }
+        .content-header h1 { font-size: 24px; }
+        .course-card { min-width: 100%; }
+        .mission-stats { flex-direction: column; gap: 15px; }
+    }
+  </style>
+</head>
+<body>
+  
+  <header class="navbar">
+    <div class="navbar-logo">
+      <h1>GEINCOS PORTAL</h1>
+    </div>
+    <div class="user-info">
+      <span class="material-icons-outlined">account_circle</span>
+      <span id="welcome-user-name">Bienvenido, Usuario</span>
+      <a href="index.html" class="btn-logout">
+        <span class="material-icons-outlined">logout</span>
+        Salir
+      </a>
+    </div>
+  </header>
+
+  <main class="portal-content">
+    
+    <div id="view-container">
+
+        <div id="courses-list-view">
+            <div class="content-header">
+                <h1>Mis Cursos Disponibles</h1>
+                <p>Explora el material de capacitación asignado a tu categoría (BANCO/AUNA).</p>
+            </div>
+
+            <div id="course-grid">
+                </div>
+        </div>
+
+        <div id="course-details-view" style="display: none;">
+             <button class="btn-return" onclick="showPortalView('courses-list-view')">
+                <span class="material-icons-outlined">arrow_back</span>
+                Volver a Mis Cursos
+            </button>
+            <div id="course-view-container">
+                <div class="content-header">
+                    <h1 id="course-detail-title"></h1>
+                    <p id="course-detail-category"></p>
+                </div>
+                
+                <div class="video-player">
+                    <div id="video-iframe-placeholder" style="color: #94a3b8; text-align: center; padding-top: 25%;">Cargando video...</div>
+                </div>
+
+                <h3 style="margin-top: 20px; font-weight: 600;">Descripción del Curso</h3>
+                <p id="course-detail-description" style="margin-bottom: 20px;"></p>
+                
+                <a href="#" id="evaluation-link" class="evaluation-link">
+                    <span class="material-icons-outlined" style="vertical-align: middle;">military_tech</span>
+                    Iniciar Misión de Evaluación
+                </a>
+            </div>
+        </div>
+
+        <div id="evaluation-mission-view" style="display: none;">
+            <button class="btn-return" onclick="showPortalView('course-details-view')">
+                <span class="material-icons-outlined">arrow_back</span>
+                Volver al Curso
+            </button>
+            
+            <div class="mission-header">
+                <span class="material-icons" style="font-size: 50px; color: #f97316;">rocket_launch</span>
+                <h2 id="mission-title-view">Misión: Título de Evaluación</h2>
+                <div class="mission-stats">
+                    <div class="mission-stat-item"><span class="material-icons">star</span> Dificultad: <span id="mission-difficulty">...</span></div>
+                    <div class="mission-stat-item"><span class="material-icons">timer</span> Tiempo Límite: <span id="mission-time">...</span></div>
+                    <div class="mission-stat-item"><span class="material-icons">favorite</span> Vidas: <span id="mission-lives">...</span></div>
+                </div>
+            </div>
+
+            <div class="mission-instructions">
+                <h3 style="font-weight: 600; margin-bottom: 15px;">Instrucciones de la Evaluación (<span id="mission-type">...</span>)</h3>
+                <p id="mission-type-details">Aquí se mostrarán las instrucciones específicas del tipo de evaluación.</p>
+            </div>
+            
+            <button class="btn-start-mission" id="btn-start-mission-action">
+                ¡EMPEZAR LA MISIÓN AHORA!
+            </button>
+        </div>
+        
+    </div>
+  </main>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+      // ⚠️ CRÍTICO: REEMPLAZA ESTOS VALORES CON LOS DE TU PROYECTO REAL DE SUPABASE
+      const SUPABASE_URL = 'https://qaszraspbwzanoajdrvg.supabase.co'; 
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhc3pyYXNwYnd6YW5vYWpkcnZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0MTkwMTAsImV4cCI6MjA3ODk5NTAxMH0.HfWJjrP0Xweyz7vu53crYhViWEBFdS62VicijjGEkFg';
+      
+      const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  </script>
+  <script>
+    // ----------------------------------------------------
+    // LÓGICA DEL PORTAL DE USUARIO
+    // ----------------------------------------------------
+    
+    // --- LÓGICA DE CARGA DE DATOS ---
+
+    // 1. Datos estáticos de ejemplo (Solo como fallback)
+    const defaultPortalCourses = [
+        { id: 101, title: 'Protocolos de Servicio al Cliente', category: 'BANCO (NATURA Y DUPREE)', description: 'Módulo esencial sobre la nueva normativa de atención y fidelización de clientes.', progress: 75, url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', evaluationId: 501, titulo: 'Protocolos de Servicio al Cliente', url_video: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' },
+        { id: 102, title: 'Inducción Médica Obligatoria', category: 'AUNA', description: 'Revisión anual de políticas de seguridad y nuevos procedimientos internos.', progress: 10, url: 'https://player.vimeo.com/video/84102980', evaluationId: 502, titulo: 'Inducción Médica Obligatoria', url_video: 'https://player.vimeo.com/video/84102980' },
+    ];
+    
+    // 3. Simulación de la evaluación asociada
+    const evaluations = {
+        501: { title: 'Misión: Protocolos de Servicio al Cliente', difficulty: 'Intermedio', time: '20 minutos', lives: 3, type: 'Arrastrar y Soltar' },
+        502: { title: 'Misión: Inducción Operativa', difficulty: 'Fácil', time: '10 minutos', lives: 5, type: 'Memoria de Cartas' },
+        999: { title: 'Misión: Sondeo Rápido', difficulty: 'Fácil', time: '5 minutos', lives: 5, type: 'Sondeo Rápido' }, 
+    };
+    
+    let portalCourses = []; // Se llenará con data de Supabase
+    let currentViewingCourseId = null; 
+
+    // --- FUNCIONES DE UTILIDAD (CORREGIDA PARA YOUTUBE Y THUMBNAIL) ---
+
+    function getEmbedUrl(url) {
+        const youtubeMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?.*v=|embed\/|v\/|shorts\/))([\w-]{11})(?:\S+)?/);
+        
+        if (youtubeMatch) {
+            const videoId = youtubeMatch[1];
+            // Usar formato de incrustación más compatible con parámetros de seguridad:
+            return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&autoplay=0`; 
+        }
+        
+        if (url.includes('vimeo.com')) {
+            const videoId = url.split('/').pop();
+            return `https://player.vimeo.com/video/${videoId}`;
+        }
+        return url; 
+    }
+    
+    function getThumbnailUrl(url) {
+        const youtubeMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?.*v=|embed\/|v\/|shorts\/))([\w-]{11})(?:\S+)?/);
+        
+        if (youtubeMatch) {
+            const videoId = youtubeMatch[1];
+            // Calidad máxima disponible (maxresdefault)
+            return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+        }
+        return null; 
+    }
+
+    // --- MANEJO DE VISTAS ---
+
+    function showPortalView(viewId) {
+        document.getElementById('courses-list-view').style.display = 'none';
+        document.getElementById('course-details-view').style.display = 'none';
+        document.getElementById('evaluation-mission-view').style.display = 'none';
+        
+        document.getElementById(viewId).style.display = 'block';
+        
+        if (viewId === 'evaluation-mission-view') {
+             document.querySelector('#evaluation-mission-view .btn-return').onclick = () => loadCourseDetails(currentViewingCourseId);
+        }
+    }
+    
+    function getLoggedInUserName() {
+        const lastUser = localStorage.getItem('lastLoggedInUser');
+        if (lastUser) {
+            const user = JSON.parse(lastUser);
+            if (user.fullName) return user.fullName.split(' ')[0];
+            if (user.username) return user.username;
+        }
+        return 'Usuario';
+    }
+
+    // --- RENDERIZADO ---
+    
+    // FUNCIÓN CRÍTICA: CARGA DESDE SUPABASE
+    async function fetchCoursesFromSupabase() {
+        // Mostrar un mensaje de carga
+        const grid = document.getElementById('course-grid');
+        grid.innerHTML = '<p style="color: #6366f1;">Cargando cursos de la base de datos...</p>';
+        
+        const { data, error } = await supabase
+            .from('cursos')
+            .select('id, titulo, descripcion, url_video, categoria, estado'); // Seleccionar las columnas que necesitamos
+
+        if (error) {
+            console.error('Error al cargar cursos:', error);
+            grid.innerHTML = '<p style="color:#dc2626;">Error al cargar los cursos. Comprueba tus políticas RLS.</p>';
+            return;
+        }
+
+        // Mapear los datos de Supabase a nuestra estructura local
+        portalCourses = data.map((item, index) => ({
+            id: item.id,
+            title: item.titulo,
+            category: item.categoria,
+            description: item.descripcion,
+            url: item.url_video,
+            progress: (index % 3) * 30, // Simulación de progreso
+            evaluationId: 501, // Asignar un ID de evaluación por defecto
+            status: item.estado
+        }));
+        
+        renderCourseCards();
+    }
+
+
+    function renderCourseCards() {
+        const grid = document.getElementById('course-grid');
+        grid.innerHTML = ''; // Limpiar el grid si hay un mensaje de carga
+        
+        if (!portalCourses || portalCourses.length === 0) {
+             grid.innerHTML = '<p style="color:#f97316;">No hay cursos disponibles. Crea uno como Administrador.</p>';
+             return;
+        }
+
+        portalCourses.forEach(course => {
+            const card = document.createElement('div');
+            card.className = 'course-card';
+            card.setAttribute('data-id', course.id);
+            card.onclick = () => loadCourseDetails(course.id);
+
+            const thumbnailUrl = getThumbnailUrl(course.url);
+            const thumbnailStyle = thumbnailUrl ? `style="background-image: url('${thumbnailUrl}');"` : '';
+            const thumbnailIcon = thumbnailUrl ? '' : '<span class="material-icons-outlined">play_circle_outline</span>';
+
+            const categoryDisplay = course.category;
+            const descriptionPreview = course.description ? course.description.substring(0, 100) + '...' : 'Sin descripción.';
+
+            card.innerHTML = `
+                <div class="course-thumbnail" ${thumbnailStyle}>
+                    ${thumbnailIcon}
+                </div>
+                <h2>${course.title}</h2>
+                <p>${categoryDisplay}</p>
+                <p style="font-size: 13px; color: #c4d0e0; min-height: 40px;">${descriptionPreview}</p>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: ${course.progress || 0}%;"></div>
+                </div>
+                <div class="course-card-footer">
+                    <span style="color: ${course.progress === 100 ? '#10b981' : '#f97316'};">
+                        Avance: ${course.progress || 0}%
+                    </span>
+                    <span class="material-icons-outlined" style="color: #6366f1;">play_circle</span>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function loadCourseDetails(courseId) {
+        const course = portalCourses.find(c => c.id == courseId); 
+        if (!course) return;
+        
+        currentViewingCourseId = courseId; 
+
+        document.getElementById('course-detail-title').textContent = course.title;
+        document.getElementById('course-detail-category').textContent = course.category;
+        document.getElementById('course-detail-description').textContent = course.description || 'No hay descripción detallada para este curso.';
+        
+        const evaluationLink = document.getElementById('evaluation-link');
+        evaluationLink.onclick = (e) => {
+             e.preventDefault();
+             loadEvaluationMission(course.evaluationId);
+        };
+
+        const embedUrl = getEmbedUrl(course.url);
+        
+        const videoPlaceholder = document.getElementById('video-iframe-placeholder');
+        if (embedUrl) {
+            videoPlaceholder.innerHTML = `
+                <iframe 
+                    src="${embedUrl}" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>
+            `;
+        } else {
+             videoPlaceholder.innerHTML = `<div style="color: #dc2626; text-align: center; padding-top: 25%;">Error: URL de video no válida o no incrustable.</div>`;
+        }
+
+        showPortalView('course-details-view');
+    }
+
+    function loadEvaluationMission(evalId) {
+        const mission = evaluations[evalId] || evaluations[999];
+        if (!mission) {
+            alert('Misión de evaluación no encontrada.');
+            return;
+        }
+
+        document.getElementById('mission-title-view').textContent = mission.title;
+        document.getElementById('mission-difficulty').textContent = mission.difficulty;
+        document.getElementById('mission-time').textContent = mission.time;
+        document.getElementById('mission-lives').textContent = mission.lives;
+        document.getElementById('mission-type').textContent = mission.type;
+        
+        let instructions = '';
+        if (mission.type === 'Arrastrar y Soltar') {
+            instructions = 'Tu misión es completar correctamente la secuencia de atención al cliente. Arrastra los 5 pasos del protocolo a la caja de orden correcta en el menor tiempo posible.';
+        } else if (mission.type === 'Memoria de Cartas') {
+             instructions = 'Encuentra todas las parejas de cartas iguales antes de que se acabe el tiempo. ¡La concentración es clave!';
+        } else {
+            instructions = `Instrucciones específicas para la evaluación tipo "${mission.type}" serán cargadas aquí.`;
+        }
+        document.getElementById('mission-type-details').textContent = instructions;
+
+        document.getElementById('btn-start-mission-action').onclick = () => {
+            alert(`Simulación: Iniciando el juego "${mission.type}" para el curso ${currentViewingCourseId}.`);
+        };
+
+        showPortalView('evaluation-mission-view');
+    }
+
+
+    // Inicialización al cargar la página
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('welcome-user-name').textContent = `Bienvenido, ${getLoggedInUserName()}`;
+        
+        // CRÍTICO: CARGAR CURSOS DE SUPABASE AL INICIO
+        fetchCoursesFromSupabase();
+        
+        showPortalView('courses-list-view');
+    });
+
+    // Simular el cierre de sesión
+    document.querySelector('.btn-logout').addEventListener('click', function(e) {
+        e.preventDefault();
+        alert('Cerrando sesión del usuario...');
+        localStorage.removeItem('lastLoggedInUser');
+        window.location.href = 'index.html';
+    });
+
+  </script>
+</body>
+</html>
